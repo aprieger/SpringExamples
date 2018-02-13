@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+<!-- 	Annotation Configuration
+			Another method of configuring Spring Applications
+			Alternative to strictly XML Configuration
+			Adding specific annotations to our source files
+			Context Namespace
+				<context:annotation-config/>
+			Ways annotations config can be used
+				XML for 'base' bean definitions/annotations for DI
+				Annotations for both bean definitions and DI
+					<context:component-scanner/>
+			Mixing and matching Annotation config and XML config IS valid
+				XML based config overrides annotation based
+-->
+	<!-- indicates that spring is using annotations -->
+	<context:annotation-config/>
+	
+	<bean id="dairy" class="food.Dairy"></bean>
+	
+	<!-- @Value >> Fruit.java -->
+	<bean id="fruitWithValue" class="food.Fruit"/>
+	
+	<!-- @Autowired(required=false) >> Meal.java -->
+	<!-- Commented out grain, and it will NOT cause error, because we said it is not required -->
+	<!-- <bean id="grain" class="food.Grain"></bean> -->
+	
+	<bean id="meat" class="food.Meat"></bean>
+	<bean id="vegetable" class="food.Vegetable"></bean>
+	<bean id="mealByAnnotation" class="food.Meal"></bean>
+	
+	<!-- @Required >> Grain.java-->
+	<!-- the description is required to have a value, if no value is entered, the program will fail -->
+	<bean id="grainRequired" class="food.Grain">
+		<property name="description" value="Hi I am a grain, I am seeds harvested from crops"/>
+	</bean>
+	
+<!-- -->
+<!--	Alternative Annotations in Spring
+			Spring is a self-contained framework with different configuration options
+				XML Configuration
+				Annotation configuration
+				Java Configuration
+			Spring provided native annotations
+			Java Specification Requests
+			Example:
+				Native: @Autowired
+				JSR-250: @Resource
+				JSR-330: @Inject
+-->
+	<!--  -->
+	<context:component-scan base-package="car"/>
+	
+	<!-- @Qualifier >> MagnumOpus.java -->
+	<!-- This qualifier is explicitly stated for the small tire type-->
+	<bean id="smallTire" class="car.SmallTire">
+		<qualifier value="sTire"/>
+	</bean>
+	
+	<!-- This qualifier isn't explicitly stated; however, you can use the id of the bean as the qualifier -->
+	<bean id="largeTire" class="car.LargeTire"/>
+	
+	<!-- @Named >> SixCylinderEngine.java-->
+	<!-- The sixCyl bean is commented out, because it is created using the @Named annotation in its class -->
+	<!-- <bean id="sixCyl" class="car.SixCylinderEngine"/> -->
+	
+	<!-- @Component >> EightCylinderEngine.java -->
+	<!-- The eightCyl bean is commented out, because it is created using the @Component annotation in its class -->
+	<!-- <bean id="eightCyl" class="car.EightCylinderEngine"/>-->
+	
+	<!-- @Autowired / @Resource / @Inject >> MagnumOpus.java -->
+	<bean id="magnumOpusAutowired" class="car.MagnumOpus"></bean>
+	
+<!-- 	Stereotype Annotations in Spring 
+			Markers for classes that fulfill a specific role within an application:
+				@Component, @Repository, @Service, @Controller
+			@Component:
+				Generic way to represent any spring managed component
+			@Repository:
+				Stereotype for persistence layer of application
+			@Service:
+				Stereotype for service layer of an application
+			@Controller:
+				Stereotype for presentation layer of an application (Spring MVC apps)
+-->
+	<context:component-scan base-package="computer">
+		<context:include-filter type="annotation" expression="customannotations.ComputerWithoutAnnotation"/>
+	</context:component-scan>
+	
+<!-- SPRING EXPRESSION LANGUAGE IN XML CONFIGURATION -->
+	<bean id="dataSourceDairyBean" class="food.DataSourceDairy"/>
+	<bean id="dairySpringExpressionXML" class="food.Dairy">
+		<!-- When making Spring expressions, you can use instances of the objects like: dataSourceBean.getCheeseType()  -->
+		<!-- Or you can use static methods by stating the class with prefix T like: T(food.DataSource).getCheeseTypeStatic() -->
+		<property name="name" value="#{dataSourceDairyBean.getCheeseType() + ' Cheese with ' + T(food.DataSourceDairy).getCheeseTypeStatic()}"/>
+		<property name="nutritionalRating" value="#{T(java.lang.Math).random()*10}"/>
+	</bean>
+	
+<!-- SPRING EXPRESSION LANGUAGE IN ANNOTATION CONFIGURATION -->
+	<context:component-scan base-package="food"/>
+	
+<!-- SETTING PROPERTIES USING SPRING EXPRESSION LANGUAGE -->
+	<bean id="meatSpringExpressionProp" class="food.Meat">
+		<property name="name" value="Bacon"/>
+		<property name="nutritionalRating" value="10"/>
+	</bean>
+	
+<!-- ACCESSING SYSTEM PROPERTIES -->
+	<bean id="winScript" class="scripts.WinScript"/>
+	<bean id="unixScript" class="scripts.UnixScript"/>
+	<bean id="scriptLoader" class="scripts.ScriptLoader">
+		<property name="script" value="#{systemProperties['os.name'] matches 'Windows 10' ? winScript : unixScript}"/>
+	</bean>	
+</beans>
